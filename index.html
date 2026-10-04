@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#006d77">
+  <meta name="description" content="Abschlussübung zu Oberflächenangaben und weiteren Angaben in technischen Zeichnungen. Industriemechanik, Klasse 11.">
+  <title>Zeichnungs-Check | Industriemechanik 11</title>
+  <style>
+    :root {
+      --ink: #272a30; --muted: #646b74; --paper: #fff; --ground: #f3f4f6;
+      --line: #d9dde2; --green: #006d77; --green-light: #e2f1f2;
+      --yellow: #b7473b; --yellow-light: #fbece9; --red: #b22938;
+      --red-light: #fff0f2; --radius: 6px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--ground); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; font-size: 15px; line-height: 1.5; letter-spacing: 0; }
+    button, input, select { font: inherit; letter-spacing: 0; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; }
+    button, a, input, select { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid #287cba; outline-offset: 3px; }
+    button:disabled { opacity: .55; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 25px; line-height: 1.2; font-weight: 750; }
+    h2 { font-size: 25px; line-height: 1.25; font-weight: 700; }
+    h3 { font-size: 17px; line-height: 1.4; }
+    .icon { width: 19px; height: 19px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .masthead { background: var(--paper); border-top: 5px solid var(--green); border-bottom: 1px solid var(--line); }
+    .header-inner { max-width: 1440px; padding: 23px 32px; margin: auto; display: flex; gap: 24px; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 15px; }
+    .brand-mark { width: 46px; height: 46px; color: var(--green); flex-shrink: 0; }
+    .brand small { display: block; color: var(--muted); font-size: 12px; margin-top: 5px; }
+    .header-meta { display: flex; align-items: center; gap: 22px; }
+    .class-label { font-size: 12px; color: var(--muted); text-align: right; }
+    .class-label strong { display: block; color: var(--ink); font-size: 13px; }
+    .icon-button { display: inline-flex; width: 38px; height: 38px; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: var(--radius); background: white; color: var(--ink); position: relative; flex-shrink: 0; }
+    .icon-button:hover { background: var(--ground); }
+    .icon-button[data-tip]:hover:after, .icon-button[data-tip]:focus-visible:after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); right: 0; background: var(--ink); color: white; padding: 7px 10px; border-radius: 4px; font-size: 12px; white-space: nowrap; z-index: 10; }
+    .workspace { max-width: 1440px; margin: auto; display: grid; grid-template-columns: 238px minmax(0, 1fr); min-height: calc(100vh - 110px); }
+    .sidebar { padding: 29px 22px 22px 32px; border-right: 1px solid var(--line); }
+    .eyebrow { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0; }
+    .mode-tabs { display: grid; gap: 7px; margin: 14px 0 28px; }
+    .mode-tab { min-height: 45px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid transparent; border-radius: var(--radius); background: transparent; color: var(--muted); text-align: left; font-size: 14px; font-weight: 650; }
+    .mode-tab.active { color: var(--green); border-color: #9dc9ce; background: var(--green-light); }
+    .mode-tab.competition.active { background: var(--yellow-light); border-color: #deb2aa; color: #92382d; }
+    .side-heading { margin-bottom: 14px; }
+    .step-list { display: grid; gap: 4px; }
+    .step { display: flex; width: 100%; gap: 10px; align-items: center; padding: 8px 5px; border: 0; background: transparent; text-align: left; border-radius: 4px; color: var(--muted); font-size: 12px; line-height: 1.3; }
+    .step:disabled { opacity: .6; }
+    .step.active { color: var(--ink); font-weight: 700; background: #e5e8ec; }
+    .step-number { width: 25px; height: 25px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #ccd1d8; border-radius: 50%; font-size: 11px; background: white; }
+    .step.active .step-number { background: var(--green); border-color: var(--green); color: white; }
+    .step.done .step-number { color: var(--green); background: var(--green-light); border-color: #a6ccd0; }
+    .step-number .icon { width: 15px; height: 15px; }
+    .side-bottom { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .side-bottom strong { display: block; font-size: 16px; color: var(--ink); margin: 3px 0 10px; }
+    .mini-progress { height: 5px; background: #dfe3e8; overflow: hidden; border-radius: 2px; }
+    .mini-progress span { display: block; background: var(--green); height: 100%; transition: width .25s; }
+    .main { padding: 29px 32px 24px; min-width: 0; }
+    .work-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 22px; }
+    .work-top > div:first-child { min-width: 0; flex: 1; }
+    .work-top h2 { font-size: 22px; margin-top: 4px; overflow-wrap: anywhere; hyphens: auto; }
+    .time-badge { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+    .time-badge.live { font-size: 22px; color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 750; padding: 8px 13px; background: var(--yellow-light); border-radius: var(--radius); }
+    .time-badge.urgent { color: var(--red); background: var(--red-light); }
+    .work-grid { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+    .drawing { margin: 0; min-width: 0; border: 1px solid #c8cfd6; background: white; }
+    .drawing-toolbar { display: flex; padding: 11px 15px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); gap: 8px; font-size: 12px; }
+    .drawing-toolbar .icon-button { height: 30px; width: 30px; border: 0; }
+    .sheet { padding: 17px 12px 12px; background-image: linear-gradient(#ebedf0 1px, transparent 1px), linear-gradient(90deg, #ebedf0 1px, transparent 1px); background-size: 22px 22px; }
+    .technical { width: 100%; height: auto; display: block; aspect-ratio: 600 / 365; color: #2b3037; }
+    .technical text { font-family: Arial, sans-serif; letter-spacing: 0; fill: currentColor; }
+    .technical .technical-label { font-size: 18px; }
+    .technical .small { font-size: 15px; fill: var(--muted); }
+    .technical .accent { fill: var(--green); }
+    .title-block { border: 1px solid #a8b4ac; display: grid; grid-template-columns: 1fr auto; font-size: 10px; color: var(--muted); background: white; }
+    .title-block > div { padding: 7px 9px; }
+    .title-block > div + div { border-left: 1px solid #a8b4ac; }
+    .title-block strong { display: block; color: var(--ink); font-size: 12px; }
+    .drawing figcaption { padding: 12px 15px; background: #f8f9fa; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; min-height: 58px; }
+    .question { min-width: 0; }
+    .tag { display: inline-block; font-size: 11px; font-weight: 700; color: var(--green); background: var(--green-light); padding: 4px 8px; border-radius: 3px; margin-bottom: 12px; }
+    .competition-tag { color: #92382d; background: var(--yellow-light); }
+    .question h3 { font-size: 23px; line-height: 1.3; margin-bottom: 10px; }
+    .question-copy { color: var(--muted); font-size: 14px; margin-bottom: 19px; }
+    fieldset { padding: 0; margin: 0; border: 0; min-width: 0; }
+    legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .answers { display: grid; gap: 8px; }
+    .choice { display: flex; gap: 11px; align-items: flex-start; background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; font-size: 14px; line-height: 1.4; cursor: pointer; min-width: 0; }
+    .choice:hover { border-color: #87b7bd; }
+    .choice:has(input:checked) { background: var(--green-light); border-color: var(--green); }
+    .choice input { margin: 3px 0 0; accent-color: var(--green); width: 16px; height: 16px; flex-shrink: 0; }
+    .choice span { overflow-wrap: anywhere; }
+    .fields { display: grid; gap: 13px; }
+    .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(125px, 1.15fr); align-items: center; gap: 12px; padding-bottom: 13px; border-bottom: 1px solid var(--line); }
+    .field-row:last-child { padding-bottom: 0; border: 0; }
+    .field-row label { font-size: 13px; line-height: 1.45; }
+    .field-row label strong { display: block; font-size: 16px; margin-bottom: 4px; }
+    .field-control { position: relative; min-width: 0; }
+    select, .number-input, .text-input { background: white; border: 1px solid #bfc6cf; border-radius: 4px; min-height: 43px; width: 100%; padding: 9px; color: var(--ink); font-size: 13px; }
+    select { text-overflow: ellipsis; }
+    .number-input { padding-right: 43px; font-variant-numeric: tabular-nums; }
+    .unit { position: absolute; right: 10px; top: 10px; color: var(--muted); font-size: 13px; pointer-events: none; }
+    .hint-box { margin-top: 15px; padding: 12px 14px; background: #edf0f6; border-left: 3px solid #707f9b; font-size: 13px; }
+    .feedback { margin-top: 17px; padding: 13px 15px; border-left: 3px solid var(--green); background: var(--green-light); font-size: 13px; }
+    .feedback.wrong { border-color: var(--red); background: var(--red-light); }
+    .feedback strong { display: block; margin-bottom: 5px; font-size: 14px; }
+    .feedback.neutral { background: #eaf0f4; border-color: #658598; }
+    .validation { color: var(--red); margin-top: 12px; font-size: 13px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 21px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 17px; min-height: 45px; border: 1px solid var(--green); background: var(--green); color: white; border-radius: var(--radius); font-size: 14px; font-weight: 650; }
+    .button:hover { background: #00545d; }
+    .button.secondary { background: white; color: var(--ink); border-color: #bdc5cf; }
+    .button.secondary:hover { background: #eef0f3; }
+    .button.yellow { background: var(--yellow); color: white; border-color: var(--yellow); }
+    .button.yellow:hover { background: #96392f; }
+    .text-button { display: inline-flex; gap: 6px; align-items: center; background: transparent; border: 0; color: var(--muted); padding: 8px 3px; font-size: 12px; }
+    .text-button:hover { color: var(--green); }
+    .points-note { color: var(--muted); font-size: 11px; margin-top: 14px; }
+    .bottom-line { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 14px; display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 11px; }
+    .transition { max-width: 790px; margin: 15px auto; }
+    .transition h2 { font-size: 30px; margin: 15px 0 12px; }
+    .transition p { color: var(--muted); max-width: 610px; font-size: 15px; }
+    .seal { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; border: 1px solid #a2c9ce; border-radius: 50%; background: var(--green-light); color: var(--green); }
+    .seal .icon { width: 30px; height: 30px; }
+    .seal.yellow { background: var(--yellow-light); color: #92382d; border-color: #deb2aa; }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 27px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .stat { padding: 21px 12px 21px 0; }
+    .stat + .stat { border-left: 1px solid var(--line); padding-left: 21px; }
+    .stat span { display: block; color: var(--muted); font-size: 12px; }
+    .stat strong { display: block; font-size: 26px; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+    .stat .score-total { display: inline; color: var(--muted); font-size: 18px; font-weight: 500; }
+    .competition-rules { display: grid; gap: 0; margin-top: 26px; }
+    .rule { padding: 12px 0; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 14px; font-size: 14px; }
+    .rule .icon { color: var(--green); }
+    .result-summary { margin: 20px 0; padding-left: 15px; border-left: 3px solid var(--green); }
+    .result-summary p { font-size: 14px; }
+    .review-heading { margin: 30px 0 14px; }
+    .review-list { display: grid; gap: 8px; }
+    .review-item { background: white; border: 1px solid var(--line); border-radius: 4px; }
+    .review-item summary { cursor: pointer; padding: 13px 14px; display: flex; gap: 10px; align-items: center; font-size: 13px; list-style: none; }
+    .review-item summary::-webkit-details-marker { display: none; }
+    .review-item summary:after { content: "+"; font-size: 18px; margin-left: auto; color: var(--muted); }
+    .review-item[open] summary:after { content: "−"; }
+    .review-item .review-body { padding: 0 15px 15px 43px; font-size: 13px; color: var(--muted); }
+    .review-body p + p { margin-top: 8px; }
+    .status-dot { display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: var(--green-light); color: var(--green); border-radius: 50%; flex-shrink: 0; }
+    .status-dot.wrong { background: var(--red-light); color: var(--red); }
+    .status-dot .icon { width: 12px; height: 12px; }
+    .best { font-size: 12px; color: var(--muted); margin-top: 17px; }
+    .review-drawing { margin: 12px 0; max-width: 450px; background: #f8f9fa; }
+    dialog { border: 1px solid var(--line); border-radius: 8px; padding: 25px; max-width: min(480px, calc(100vw - 32px)); color: var(--ink); box-shadow: 0 12px 55px #0003; }
+    dialog::backdrop { background: #18232c5c; }
+    dialog h2 { font-size: 22px; margin-bottom: 10px; }
+    dialog p { color: var(--muted); font-size: 14px; }
+    .zoom-dialog { width: 1000px; max-width: calc(100vw - 28px); padding: 17px; }
+    .zoom-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; gap: 10px; }
+    .zoom-dialog .technical { max-height: 72vh; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    [hidden] { display: none !important; }
+    @media (min-width: 1450px) { .main { padding: 35px 40px; } .work-grid { gap: 32px; } }
+    @media (max-width: 1130px) {
+      .workspace { grid-template-columns: 200px minmax(0, 1fr); }
+      .sidebar { padding-left: 22px; padding-right: 17px; }
+      .main { padding: 25px 23px; }
+      .work-grid { gap: 20px; grid-template-columns: minmax(0, .95fr) minmax(0, 1fr); }
+      .field-row { grid-template-columns: minmax(0, 1fr); gap: 7px; }
+      .field-row:has(select) { grid-template-columns: minmax(0, 1fr); }
+      .field-row:has(.text-input) { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .workspace { display: block; }
+      .sidebar { padding: 13px 24px; border-right: 0; border-bottom: 1px solid var(--line); display: flex; gap: 22px; align-items: center; justify-content: space-between; }
+      .sidebar > .eyebrow, .side-heading, .step-list { display: none; }
+      .mode-tabs { display: flex; margin: 0; gap: 8px; }
+      .mode-tab { min-height: 41px; padding: 8px 12px; }
+      .side-bottom { margin: 0; padding: 0; border: 0; width: 160px; }
+      .side-bottom strong { font-size: 13px; margin: 0 0 5px; }
+      .side-bottom .eyebrow { display: none; }
+      .header-inner { padding: 20px 24px; }
+      .field-row { grid-template-columns: minmax(0, 1fr) minmax(130px, 1.1fr); }
+    }
+    @media (max-width: 650px) {
+      .header-inner { padding: 16px; gap: 12px; }
+      h1 { font-size: 21px; }
+      .brand { gap: 10px; min-width: 0; }
+      .brand > div { min-width: 0; }
+      .brand-mark { width: 35px; height: 35px; }
+      .brand small { font-size: 11px; }
+      .class-label { display: none; }
+      .header-meta { gap: 0; }
+      .sidebar { padding: 10px 15px; gap: 10px; }
+      .mode-tab { font-size: 12px; padding: 7px 9px; gap: 6px; }
+      .mode-tab .icon { width: 16px; height: 16px; }
+      .side-bottom { width: 90px; text-align: right; flex-shrink: 0; }
+      .side-bottom strong { font-size: 11px; }
+      .main { padding: 20px 16px; }
+      .work-top { margin-bottom: 17px; }
+      .work-top h2 { font-size: 20px; }
+      .time-badge { font-size: 11px; gap: 5px; }
+      .work-top .eyebrow { font-size: 10px; }
+      .time-badge.live { font-size: 20px; padding: 7px 10px; }
+      .work-grid { grid-template-columns: minmax(0, 1fr); gap: 23px; }
+      .sheet { padding: 8px; }
+      .technical { max-height: 250px; }
+      .drawing figcaption { padding: 9px 12px; min-height: 0; font-size: 11px; }
+      .drawing-toolbar { padding: 7px 12px; }
+      .question h3 { font-size: 22px; }
+      .question-copy { margin-bottom: 15px; }
+      .field-row { grid-template-columns: minmax(0, 1fr) minmax(130px, 1.15fr); }
+      .bottom-line { font-size: 10px; flex-wrap: wrap; }
+      .transition { margin: 5px 0; }
+      .transition h2 { font-size: 27px; }
+      .stat strong { font-size: 23px; }
+      .stat .score-total { font-size: 14px; }
+      .stat { padding: 15px 6px 15px 0; }
+      .stat + .stat { padding-left: 10px; }
+      .stat span { font-size: 11px; }
+      .review-item .review-body { padding-left: 15px; }
+      .zoom-dialog .technical { max-height: none; }
+    }
+    @media (max-width: 360px) {
+      .header-inner { padding: 14px; gap: 8px; }
+      h1 { font-size: 19px; }
+      .brand-mark { width: 30px; height: 30px; }
+      .sidebar { flex-wrap: wrap; }
+      .mode-tabs { width: 100%; }
+      .mode-tab { flex: 1; }
+      .side-bottom { width: 100%; display: flex; align-items: center; gap: 12px; }
+      .side-bottom strong { margin: 0; }
+      .side-bottom .mini-progress { flex: 1; }
+      .field-row { grid-template-columns: minmax(0, 1fr); }
+      .stats { grid-template-columns: minmax(0, 1fr); }
+      .stat { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; }
+      .stat strong { margin: 0; }
+      .stat + .stat { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    @media print {
+      body { background: white; font-size: 12px; }
+      .masthead, .sidebar, .actions, .bottom-line, dialog, .best { display: none !important; }
+      .workspace { display: block; min-height: 0; }
+      .main { padding: 0; }
+      .transition { max-width: none; }
+      .review-item { break-inside: avoid; }
+      .review-item .review-body { display: block; }
+      .stats { margin: 14px 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="header-inner">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 24 19 43 41 5M8 24h22" fill="none" stroke="currentColor" stroke-width="3"/><path d="M29 5h15" stroke="currentColor" stroke-width="2"/></svg>
+        <div><h1>Zeichnungs-Check</h1><small>Oberflächen &amp; weitere Zeichnungsangaben</small></div>
+      </div>
+      <div class="header-meta">
+        <div class="class-label"><strong>Industriemechanik · Klasse 11</strong>Abschlussübung · ca. 10–15 Minuten</div>
+        <button id="reset" class="icon-button" aria-label="Neu beginnen" data-tip="Neu beginnen"></button>
+      </div>
+    </div>
+  </header>
+  <div class="workspace">
+    <aside class="sidebar" aria-label="Übungsfortschritt">
+      <div class="eyebrow">Dein Werkstattauftrag</div>
+      <nav class="mode-tabs" aria-label="Runden">
+        <button id="practice-tab" class="mode-tab"></button>
+        <button id="challenge-tab" class="mode-tab competition"></button>
+      </nav>
+      <div class="side-heading eyebrow" id="step-heading">9 Übungsaufgaben</div>
+      <nav class="step-list" id="steps" aria-label="Aufgaben"></nav>
+      <div class="side-bottom"><div class="eyebrow">Fortschritt</div><strong id="progress-label"></strong><div class="mini-progress" role="progressbar" aria-label="Bearbeitete Aufgaben" aria-valuemin="0" aria-valuemax="9"><span id="progress-fill"></span></div></div>
+    </aside>
+    <main class="main" id="main"></main>
+  </div>
+  <dialog id="reset-dialog" aria-labelledby="reset-title">
+    <h2 id="reset-title">Neu beginnen?</h2>
+    <p>Deine Antworten und der aktuelle Fortschritt werden zurückgesetzt. Dein persönlicher Wettbewerbsrekord bleibt erhalten.</p>
+    <div class="actions"><button class="button secondary" id="cancel-reset">Zurück</button><button class="button" id="confirm-reset">Neu beginnen</button></div>
+  </dialog>
+  <dialog id="zoom-dialog" class="zoom-dialog" aria-labelledby="zoom-title">
+    <div class="zoom-top"><h2 id="zoom-title">Zeichnungsausschnitt</h2><button id="close-zoom" class="icon-button" aria-label="Vergrößerung schließen" data-tip="Schließen"></button></div>
+    <div id="zoom-content"></div>
+  </dialog>
+  <div id="announcer" class="sr-only" aria-live="polite"></div>
+  <noscript><p style="padding:24px">Bitte aktiviere JavaScript im Browser, um die Übungen zu bearbeiten.</p></noscript>
+  <script>
+    "use strict";
+    // Selected Lucide icons, embedded for offline use (ISC license).
+    const iconPaths = {
+      check: '<path d="M20 6 9 17l-5-5"/>',
+      arrow: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+      bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+      reset: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+      timer: '<path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/>',
+      trophy: '<path d="M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978M18 9h1.5a1 1 0 0 0 0-5H18M4 22h16M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zM6 9H4.5a1 1 0 0 1 0-5H6"/>',
+      x: '<path d="m18 6-12 12M6 6l12 12"/>',
+      expand: '<path d="M15 3h6v6m0-6-7 7M3 21l7-7M9 21H3v-6"/>',
+      print: '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
+      book: '<path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+      target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'
+    };
+    const icon = name => '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">' + iconPaths[name] + '</svg>';
+    const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const svgText = (x, y, text, size, extra) => '<text x="' + x + '" y="' + y + '" font-size="' + (size || 20) + '" ' + (extra || '') + '>' + escapeHTML(text) + '</text>';
+    function surface(x, y, mode, roughness, process, scale) {
+      let body = '<path d="M-15 -26 0 0 45 -78" fill="none" stroke="currentColor" stroke-width="2.6"/>';
+      if (mode === "bar") body += '<path d="M-15 -26H15" stroke="currentColor" stroke-width="2.6"/>';
+      if (mode === "circle") body += '<circle cx="0" cy="-18" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/>';
+      if (roughness) body += '<path d="M45 -78h175" stroke="currentColor" stroke-width="2"/>' + svgText(48, -43, roughness, 24);
+      if (process) body += svgText(48, -88, process, 20);
+      return '<g transform="translate(' + x + ' ' + y + ') scale(' + (scale || 1) + ')">' + body + '</g>';
+    }
+    const shaft = '<path d="M60 172H160V142H400V172H535V258H400V288H160V258H60Z" fill="var(--ground)" stroke="currentColor" stroke-width="2.5"/><path d="M35 215H563" stroke="#87919b" stroke-width="1.3" stroke-dasharray="18 5 3 5"/><path d="M75 172V258M520 172V258" stroke="currentColor" stroke-width="1.5"/>';
+    function roughProfile(values) {
+      const paths = values.map((v, i) => {
+        const start = 47 + i * 103, mid = 155, amplitude = v * 5;
+        return '<path d="M' + start + ' ' + mid + 'l10 -' + (amplitude * .5) + ' 10 ' + (amplitude * .2) + ' 12 -' + (amplitude * .7) + ' 16 ' + (amplitude * 1.8) + ' 15 -' + (amplitude * .6) + ' 14 ' + (amplitude * .2) + ' 16 -' + (amplitude * .4) + ' 10 0" fill="none" stroke="var(--green)" stroke-width="2.5"/><path d="M' + start + ' 70V234" stroke="#aab2bd" stroke-dasharray="3 4"/>' + svgText(start + 51, 267, "Z" + (i + 1), 17, 'text-anchor="middle"') + svgText(start + 51, 298, v + " µm", 22, 'text-anchor="middle"');
+      }).join("");
+      return '<path d="M35 155H575" stroke="#78887d" stroke-width="1.3"/>' + paths + '<path d="M562 70V234" stroke="#aab5ad" stroke-dasharray="3 4"/>' + svgText(300, 39, "Fünf Einzelmessstrecken", 19, 'text-anchor="middle"') + svgText(300, 337, "Schematisches Rauheitsprofil", 15, 'text-anchor="middle" class="small"');
+    }
+    function frame(x, y, symbol, value, reference) {
+      let sign = symbol === "round" ? '<circle cx="22" cy="22" r="11" fill="none" stroke="currentColor" stroke-width="2"/>' : symbol === "perpendicular" ? '<path d="M11 33h27M24 33V10" stroke="currentColor" stroke-width="2.4"/>' : '<path d="m12 33 16-24m-5 24L39 9" stroke="currentColor" stroke-width="2.4"/>';
+      return '<g transform="translate(' + x + ' ' + y + ')"><rect width="' + (reference ? 216 : 165) + '" height="44" fill="white" stroke="currentColor" stroke-width="2"/><path d="M47 0v44' + (reference ? 'M165 0v44' : '') + '" stroke="currentColor" stroke-width="2"/>' + sign + svgText(105, 29, value, 23, 'text-anchor="middle"') + (reference ? svgText(190, 29, reference, 23, 'text-anchor="middle"') : '') + '</g>';
+    }
+    function drawing(kind) {
+      let body = "", alt = "";
+      if (kind === "symbols") {
+        body = surface(105, 215, "base") + surface(285, 215, "bar") + surface(465, 215, "circle");
+        ["A", "B", "C"].forEach((s, i) => { body += '<circle cx="' + (115 + i * 180) + '" cy="285" r="19" fill="var(--green-light)"/>' + svgText(115 + i * 180, 291, s, 18, 'text-anchor="middle" class="accent"'); });
+        alt = "Drei Oberflächenzeichen: A Grundzeichen, B mit Querstrich, C mit Kreis.";
+      } else if (kind === "grinding" || kind === "process") {
+        body = shaft + surface(262, 142, "bar", kind === "grinding" ? "Ra 1,6" : "Ra 0,4", kind === "grinding" ? "Schleifen" : "", .85) + '<path d="M80 310H520M80 298v24M520 298v24" stroke="#87958b" stroke-width="1.2"/>' + svgText(300, 338, "Lagerbolzen", 17, 'text-anchor="middle"');
+        alt = kind === "grinding" ? "Lagerbolzen mit Oberflächenzeichen: Materialabtrag, Schleifen, Ra 1,6." : "Lagerbolzen mit Oberflächenzeichen: Materialabtrag, Ra 0,4.";
+      } else if (kind === "parameters") {
+        body = '<path d="M50 171H550" stroke="#7d8794" stroke-width="1.5"/><path d="M50 171 74 140 96 188 116 155 137 131 161 194 183 180 206 146 227 202 250 166 271 137 294 186 318 153 340 111 359 207 381 174 405 139 428 192 451 160 474 145 496 204 519 172 550 150" fill="none" stroke="var(--green)" stroke-width="3"/>' + svgText(549, 159, "Mittellinie", 16, 'text-anchor="end" class="small"') + svgText(300, 71, "Ein Profil. Drei Kenngrößen.", 23, 'text-anchor="middle"') + svgText(121, 288, "Ra", 32, 'text-anchor="middle"') + svgText(300, 288, "Rz", 32, 'text-anchor="middle"') + svgText(478, 288, "Rmax", 32, 'text-anchor="middle"');
+        alt = "Rauheitsprofil mit Mittellinie und den Kenngrößen Ra, Rz und Rmax.";
+      } else if (kind === "measure") {
+        body = roughProfile([6, 8, 10, 7, 9]); alt = "Einzelrautiefen Z1 bis Z5: 6, 8, 10, 7 und 9 Mikrometer.";
+      } else if (kind === "sprint-measure") {
+        body = roughProfile([4, 6, 10, 5, 5]); alt = "Einzelrautiefen Z1 bis Z5: 4, 6, 10, 5 und 5 Mikrometer.";
+      } else if (kind === "cutting") {
+        body = svgText(300, 48, "Drehen · sonst gleiche Bedingungen", 20, 'text-anchor="middle"') + '<path d="M50 191H550V245H50Z" fill="var(--ground)" stroke="currentColor" stroke-width="2"/><path d="m272 65 56 74-60 22Z" fill="#dce1e7" stroke="currentColor" stroke-width="2"/><path d="M276 163q17-1 18 15" fill="none" stroke="var(--yellow)" stroke-width="4"/><path d="M370 104h90m-14-10 14 10-14 10" fill="none" stroke="var(--green)" stroke-width="2.5"/>' + svgText(455, 87, "Vorschub f", 18, 'text-anchor="end"') + '<path d="m254 147-55-37h-45" fill="none" stroke="#87919b"/>' + svgText(50, 93, "Schneidenradius r", 18) + svgText(300, 301, "Wie verändert sich die Rauheit?", 21, 'text-anchor="middle"');
+        alt = "Schema eines Drehwerkzeugs. Markiert sind Schneidenradius r und Vorschub f.";
+      } else if (kind === "relief" || kind === "sprint-relief") {
+        const outline = kind === "relief" ? "M65 108H247V162H240Q232 175 247 182Q260 193 274 179V166H526V270H274V257Q260 243 247 254Q232 263 240 274H247V317H65Z" : "M65 108H247V179Q260 193 274 179V166H526V270H274V257Q260 243 247 257V317H65Z";
+        body = '<path d="' + outline + '" fill="var(--ground)" stroke="currentColor" stroke-width="2.5"/><path d="M40 217H550" stroke="#87919b" stroke-dasharray="18 5 3 5"/><circle cx="261" cy="179" r="25" fill="none" stroke="var(--green)" stroke-width="2"/><path d="m270 155 60-69h210" fill="none" stroke="currentColor" stroke-width="1.5"/>' + svgText(331, 73, kind === "relief" ? "DIN 509 – F 1,6 × 0,3" : "DIN 509 – E 2,5 × 0,4", 19);
+        alt = kind === "relief" ? "Freistich am Absatz mit der Angabe DIN 509 – F 1,6 × 0,3." : "Freistich am Absatz mit der Angabe DIN 509 – E 2,5 × 0,4.";
+      } else if (kind === "norms") {
+        body = '<path d="M50 133H140V173H169V162H480V261H169V250H140V291H50M480 162l22 15v68l-22 16" fill="var(--ground)" stroke="currentColor" stroke-width="2.2"/><path d="M30 212H553" stroke="#87919b" stroke-dasharray="16 4 3 4"/><path d="M169 170H480M169 252H480" stroke="currentColor" stroke-width="1"/>';
+        body += '<path d="m155 173 55-78h335M502 212l-10-18-21-11v58l21-11Z" fill="none" stroke="currentColor" stroke-width="1.5"/>' + svgText(210, 82, "M20 × 2,5 – DIN 76-A", 20) + '<path d="m485 212 50 84h-285" fill="none" stroke="currentColor" stroke-width="1.5"/>' + svgText(250, 328, "DIN 332 – B 3,15", 21);
+        alt = "Gewindezapfen mit M20 × 2,5 – DIN 76-A am Gewindeende und DIN 332 – B 3,15 an der Zentrierbohrung.";
+      } else if (kind === "tolerances") {
+        body = frame(68, 85, "round", "0,01") + frame(325, 85, "parallel", "0,02", "A") + '<circle cx="151" cy="254" r="67" fill="var(--ground)" stroke="currentColor" stroke-width="2.5"/><path d="M65 254h171M151 174v164" stroke="#87919b" stroke-width="1" stroke-dasharray="14 4 3 4"/><path d="M325 235h225v40H325Z" fill="var(--ground)" stroke="currentColor" stroke-width="2.5"/><path d="M151 129v58M397 129v106" stroke="currentColor" stroke-width="1.5"/><path d="m151 187-5-9h10Zm246 48-5-9h10Zm103 40-8 13h16Z" fill="currentColor"/><path d="M500 288v20" stroke="currentColor"/><rect x="484" y="308" width="32" height="32" fill="white" stroke="currentColor"/>' + svgText(500, 331, "A", 21, 'text-anchor="middle"') + svgText(300, 42, "Toleranzrahmen lesen", 23, 'text-anchor="middle"');
+        alt = "Links ein kreisförmiger Querschnitt mit Rundheitstoleranz 0,01 ohne Bezug. Rechts eine Platte mit Parallelitätstoleranz 0,02 für die obere Fläche zum Bezug A an der unteren Fläche.";
+      } else if (kind === "unmachined") {
+        body = shaft + surface(275, 142, "circle", "Rz 10", "", .85);
+        alt = "Lagerbolzen mit Kreis im Oberflächenzeichen und Rz 10.";
+      } else if (kind === "edge") {
+        body = '<path d="M110 184h195v123H110" fill="var(--ground)" stroke="currentColor" stroke-width="2.5"/><path d="m305 184-19 19v20" fill="none" stroke="var(--green)" stroke-width="3"/><path d="m298 190 82-89h126M380 101v-34" fill="none" stroke="currentColor" stroke-width="2"/><path d="m298 190 6-17 9 8Z" fill="currentColor"/>' + svgText(391, 48, "−0,3", 24) + svgText(391, 88, "−0,1", 24) + svgText(300, 343, "Angabe für eine Außenkante · Maße in mm", 17, 'text-anchor="middle"');
+        alt = "Außenkante mit Kantenangabe minus 0,3 und minus 0,1 Millimeter.";
+      } else if (kind === "hardness") {
+        body = shaft + '<rect x="133" y="42" width="355" height="80" fill="white" stroke="#aab5ad"/><text x="150" y="76" font-size="23">Einsatzgehärtet: 61<tspan baseline-shift="super" font-size="16">+2</tspan> HRC</text><text x="150" y="107" font-size="23">Eht = 1,0<tspan baseline-shift="super" font-size="16">+0,1</tspan> mm</text>' + svgText(300, 330, "Härte & Einsatzhärtungstiefe", 19, 'text-anchor="middle"');
+        alt = "Lagerbolzen: Einsatzgehärtet 61 plus 2 HRC, Eht 1,0 plus 0,1 Millimeter.";
+      } else if (kind === "center-sprint") {
+        body = shaft + '<path d="m535 215-14-24-25-13v74l25-13Z" fill="white" stroke="currentColor" stroke-width="1.8"/><path d="m521 191-55-106H240" fill="none" stroke="currentColor" stroke-width="1.5"/>' + svgText(240, 70, "DIN 332 – B 6,3", 25);
+        alt = "Zentrierbohrung an der Stirnseite mit der Angabe DIN 332 – B 6,3.";
+      } else if (kind === "comparison") {
+        body = shaft + surface(262, 142, "bar", "Rz 6,3", "", .85) + svgText(300, 332, "Messprotokoll: Ra = 0,8 µm", 24, 'text-anchor="middle"');
+        alt = "An der Oberfläche ist Rz 6,3 gefordert. Das Messprotokoll nennt Ra 0,8 Mikrometer.";
+      } else if (kind === "tolerance-sprint") {
+        body = frame(310,60,"perpendicular","0,03","A") + '<path d="M140 175h350v110H140Z" fill="var(--ground)" stroke="currentColor" stroke-width="2.5"/><path d="m370 104 140 40v79h-20" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m490 223 9-5v10Zm-200 62-8 13h16Z" fill="currentColor"/><path d="M290 298v15" stroke="currentColor"/><rect x="274" y="313" width="32" height="32" fill="white" stroke="currentColor"/>' + svgText(290,336,"A",21,'text-anchor="middle"');
+        alt = "Platte mit Rechtwinkligkeitstoleranz 0,03 Millimeter an der rechten Seitenfläche zum Bezug A an der unteren Fläche.";
+      } else if (kind === "inspection") {
+        body = shaft + '<path d="M84 139v33" stroke="currentColor" stroke-width="1.5"/>' + surface(84, 139, "bar", "Ra 3,2", "", .61) + surface(287, 142, "bar", "Ra 0,8", "", .61) + surface(459, 172, "bar", "Ra 1,6", "", .61);
+        [["A", 100, "Ra 1,6"], ["B", 286, "Ra 1,2"], ["C", 471, "Ra 0,9"]].forEach(row => {
+          body += '<circle cx="' + row[1] + '" cy="320" r="17" fill="var(--green-light)"/>' + svgText(row[1], 326, row[0], 17, 'text-anchor="middle" class="accent"') + svgText(row[1], 358, row[2], 18, 'text-anchor="middle"');
+        });
+        body += svgText(300, 31, "Oben: Vorgabe · unten: gemessener Ra in µm", 17, 'text-anchor="middle"');
+        alt = "Fläche A: Ra-Grenze 3,2, Messwert 1,6. Fläche B: Grenze 0,8, Messwert 1,2. Fläche C: Grenze 1,6, Messwert 0,9. Werte in Mikrometer.";
+      }
+      return '<svg class="technical" viewBox="0 0 600 365" role="img" aria-label="' + escapeHTML(alt) + '">' + body + '</svg>';
+    }
+
+    const surfaceOptions = [
+      {value:"base", label:"Verfahren nicht festgelegt"},
+      {value:"bar", label:"Materialabtrag erforderlich"},
+      {value:"circle", label:"Materialabtrag unzulässig"}
+    ];
+    // Additional norm examples checked against the manufacturer's tables:
+    // https://www.ekinsun.com/capabilities/din-509-undercut/
+    // https://guehring.com/wp-content/uploads/2018/dokumente/Kataloge-und-Sonderprogramme/Guehring_Mikrowerkzeuge_2017_DE_Internet.pdf
+    const practices = [
+      {
+        id:"signs", short:"Oberflächenzeichen", topic:"Oberflächenangaben", kind:"symbols", sheet:"Drei Grundzeichen", caption:"Die Ergänzungen am Grundzeichen bestimmen, ob Material abgetragen werden muss oder darf.",
+        title:"Welches Zeichen bedeutet was?", copy:"Ordne jedem Zeichen die passende Bedeutung zu.",
+        type:"fields", fields:["A","B","C"].map((label, i) => ({key:label, label:"Zeichen " + label, options:surfaceOptions, answer:["base","bar","circle"][i]})),
+        hint:"Achte auf die Ergänzungen: Querstrich und Kreis haben unterschiedliche Bedeutungen.",
+        solution:"A: Das Herstellverfahren ist nicht festgelegt. B: Materialabtrag ist erforderlich. C: Materialabtrag ist unzulässig."
+      },
+      {
+        id:"reading", short:"Eine Angabe lesen", topic:"Oberflächenangaben", kind:"grinding", sheet:"Lagerbolzen · Oberfläche", caption:"Die Oberflächenangabe ist der Mantelfläche des mittleren Absatzes zugeordnet.",
+        title:"Was fordert die Zeichnung?", copy:"Wähle die richtigen Aussagen zur gekennzeichneten Fläche.",
+        type:"multi", options:[
+          {value:"remove",label:"Die Fläche muss mit Materialabtrag hergestellt werden."},
+          {value:"limit",label:"Ra darf höchstens 1,6 µm betragen."},
+          {value:"grind",label:"Schleifen ist als Fertigungsverfahren vorgeschrieben."},
+          {value:"exact",label:"Ra muss genau 1,6 µm betragen; kleinere Werte sind unzulässig."},
+          {value:"rz",label:"Die Angabe begrenzt die gemittelte Rautiefe Rz auf 1,6 µm."},
+          {value:"optional",label:"Drehen ist ebenfalls zulässig, wenn Ra ≤ 1,6 µm erreicht wird."}
+        ], answer:["remove","limit","grind"], hint:"Lies die drei Teile einzeln: Zeichen, Kenngröße mit Wert und Text über der Linie.",
+        solution:"Der Querstrich fordert Materialabtrag. „Schleifen“ legt das Verfahren fest. Ra 1,6 bedeutet eine Obergrenze von 1,6 µm; ein kleinerer Ra-Wert ist zulässig."
+      },
+      {
+        id:"parameters", short:"Ra, Rz & Rmax", topic:"Rauheitskenngrößen", kind:"parameters", sheet:"Rauheitsprofil", caption:"Rz und Rmax werden hier so verwendet wie in euren Unterrichtsunterlagen mit fünf Einzelmessstrecken.",
+        title:"Drei Werte, drei Bedeutungen", copy:"Ordne jeder Beschreibung die passende Kenngröße zu.",
+        type:"fields", fields:[
+          {key:"mean", label:"Arithmetischer Mittelwert der absoluten Profilabweichungen von der Mittellinie", options:["Ra","Rz","Rmax"], answer:"Ra"},
+          {key:"five", label:"Mittelwert aus fünf Einzelrautiefen", options:["Ra","Rz","Rmax"], answer:"Rz"},
+          {key:"max", label:"Größte Einzelrautiefe auf der Gesamtmessstrecke", options:["Ra","Rz","Rmax"], answer:"Rmax"}
+        ],
+        hint:"Ra betrachtet die Abweichungen von der Mittellinie. Bei Rz und Rmax geht es um Einzelrautiefen.",
+        solution:"Ra ist der arithmetische Mittenrauwert. Rz ist in dieser Übung der Mittelwert der fünf Einzelrautiefen. Rmax ist der größte dieser Einzelwerte."
+      },
+      {
+        id:"calculation", short:"Rautiefe berechnen", topic:"Rauheitsmessung", kind:"measure", sheet:"Messprotokoll · fünf Messstrecken", caption:"Einzelrautiefen: 6 µm · 8 µm · 10 µm · 7 µm · 9 µm",
+        title:"Wie rau ist die Oberfläche?", copy:"Berechne Rz und bestimme Rmax für die fünf Messwerte.",
+        type:"fields", fields:[
+          {key:"rz",label:"Gemittelte Rautiefe",strong:"Rz",unit:"µm",answer:8},
+          {key:"rmax",label:"Größte Einzelrautiefe",strong:"Rmax",unit:"µm",answer:10}
+        ],
+        hint:"Rz = (Z1 + Z2 + Z3 + Z4 + Z5) ÷ 5. Für Rmax suchst du den größten Einzelwert.",
+        solution:"Rz = (6 + 8 + 10 + 7 + 9) ÷ 5 = 8 µm. Die größte Einzelrautiefe ist 10 µm, also Rmax = 10 µm."
+      },
+      {
+        id:"process", short:"Verfahren auswählen", topic:"Fertigungsverfahren", kind:"process", sheet:"Lagerbolzen · Feinbearbeitung", caption:"Vergleiche die geforderte Rauheit mit den typischen Bereichen aus dem Unterricht.",
+        title:"Welches Verfahren passt?", copy:"Für die Fläche ist Ra ≤ 0,4 µm gefordert. Welches Verfahren ist anhand der üblichen Rauheitsbereiche am besten geeignet?",
+        type:"single", options:[
+          {value:"casting",label:"Sandformguss"},
+          {value:"rough-turn",label:"Grobes Längsdrehen"},
+          {value:"grinding",label:"Rund-Längsschleifen"},
+          {value:"rough-mill",label:"Grobes Fräsen"},
+          {value:"reaming",label:"Reiben ohne anschließende Feinbearbeitung"}
+        ], answer:"grinding", hint:"Welches Verfahren erreicht im Unterrichtsmaterial typischerweise Ra 0,2–0,8 µm?",
+        solution:"Rund-Längsschleifen ist geeignet: Der typische Bereich im Unterrichtsmaterial liegt bei Ra 0,2–0,8 µm. Das konkrete Ergebnis hängt auch von Werkzeug, Maschine und Prozess ab."
+      },
+      {
+        id:"cutting", short:"Vorschub & Radius", topic:"Einfluss auf die Rauheit", kind:"cutting", sheet:"Drehen · Schnittbedingungen", caption:"Betrachte den geometrischen Einfluss beim Drehen; alle anderen Bedingungen bleiben gleich.",
+        title:"Was macht die Fläche feiner?", copy:"Ergänze die beiden Zusammenhänge.",
+        type:"fields", fields:[
+          {key:"feed",label:"Der Vorschub wird kleiner. Die Rauheit …",options:[{value:"down",label:"nimmt ab"},{value:"up",label:"nimmt zu"},{value:"same",label:"bleibt unverändert"}],answer:"down"},
+          {key:"radius",label:"Der Schneidenradius wird größer. Die Rauheit …",options:[{value:"down",label:"nimmt ab"},{value:"up",label:"nimmt zu"},{value:"same",label:"bleibt unverändert"}],answer:"down"}
+        ],
+        hint:"Denke an die Rillen, die die Schneide beim Vorschub hinterlässt, und an ihre Überlappung.",
+        solution:"Unter sonst gleichen Bedingungen führen ein kleinerer Vorschub und ein größerer Schneidenradius zu einer geringeren geometrisch bedingten Rauheit."
+      },
+      {
+        id:"relief", short:"Freistich entschlüsseln", topic:"Genormte Formelemente", kind:"relief", sheet:"Wellenabsatz · Freistich", caption:"DIN 509 – F 1,6 × 0,3 · Die Maße sind in Millimetern angegeben.",
+        title:"Was steckt in der Bezeichnung?", copy:"Entschlüssle den Freistich nach DIN 509.",
+        type:"fields", fields:[
+          {key:"form",label:"Form des Freistichs",options:["E","F","G","H"],answer:"F"},
+          {key:"radius",label:"Radius r",unit:"mm",answer:1.6},
+          {key:"depth",label:"Einstichtiefe t₁",unit:"mm",answer:.3}
+        ],
+        hint:"Die Reihenfolge lautet: Norm – Form – Radius × Einstichtiefe.",
+        solution:"DIN 509 bezeichnet den Freistich. F ist die Form, r = 1,6 mm der Radius und t₁ = 0,3 mm die Einstichtiefe."
+      },
+      {
+        id:"norms", short:"Weitere Formelemente", topic:"Genormte Formelemente", kind:"norms", sheet:"Gewindezapfen · Formelemente", caption:"Normangaben am Gewindeende und an der Stirnseite des Werkstücks.",
+        title:"Welche Angaben erkennst du?", copy:"Ordne die Bezeichnungen zu und gib den Bohrungsdurchmesser d₁ der Zentrierbohrung an.",
+        type:"fields", fields:[
+          {key:"thread",label:"M20 × 2,5 – DIN 76-A",options:["Gewindefreistich","Zentrierbohrung","Freistich nach DIN 509","Toleriertes Maß","Keilwellenprofil","Kantenangabe"],answer:"Gewindefreistich"},
+          {key:"center",label:"DIN 332 – B 3,15",options:["Gewindefreistich","Zentrierbohrung","Freistich nach DIN 509","Toleriertes Maß","Keilwellenprofil","Kantenangabe"],answer:"Zentrierbohrung"},
+          {key:"centerDiameter",label:"Bohrungsdurchmesser d₁",unit:"mm",answer:3.15}
+        ],
+        hint:"Die Normnummer benennt das Formelement. Bei DIN 332 folgen darauf die Form und der Bohrungsdurchmesser d₁.",
+        solution:"M20 × 2,5 bezeichnet ein metrisches Gewinde mit 20 mm Nenndurchmesser und 2,5 mm Steigung; DIN 76-A den zugehörigen Gewindefreistich. DIN 332 – B 3,15 bezeichnet eine Zentrierbohrung der Form B mit Schutzsenkung und d₁ = 3,15 mm."
+      },
+      {
+        id:"tolerance", short:"Form oder Lage?", topic:"Form- und Lagetoleranzen", kind:"tolerances", sheet:"Geometrische Toleranzen", caption:"Toleranzwerte in mm · A kennzeichnet einen festgelegten Bezug.",
+        title:"Welche Toleranz ist gemeint?", copy:"Benenne die Toleranz in jedem Rahmen und ordne sie als Form- oder Lagetoleranz ein.",
+        type:"fields", fields:[
+          {key:"roundName",label:"Links · Toleranzname",accepted:["Rundheit","Rundheitstoleranz","Rundheitsabweichung"]},
+          {key:"roundType",label:"Links · Toleranzart",accepted:["Formtoleranz","Form","Formabweichung"]},
+          {key:"parallelName",label:"Rechts · Toleranzname",accepted:["Parallelität","Parallelitat","Parallelitätstoleranz","Parallelitatstoleranz"]},
+          {key:"parallelType",label:"Rechts · Toleranzart",accepted:["Lagetoleranz","Lage","Richtungstoleranz","Orientierungstoleranz"]}
+        ],
+        hint:"Beschreibt das Zeichen die Form eines einzelnen Elements oder die Ausrichtung zu einem anderen Element? Nutze die Symbolübersicht im Tabellenbuch.",
+        solution:"Der Kreis steht für eine Rundheitstoleranz von 0,01 mm ohne Bezug. Die parallelen Linien stehen für eine Parallelitätstoleranz von 0,02 mm zum Bezug A; im Unterricht gehört sie zu den Lagetoleranzen."
+      }
+    ];
+    const challenges = [
+      {
+        id:"c-sign", short:"Oberflächenzeichen", topic:"Oberflächenangaben", kind:"unmachined", sheet:"Lagerbolzen · Oberfläche", caption:"Lies Zeichen, Kenngröße und Grenzwert zusammen.",
+        title:"Welche Aussage stimmt?", copy:"Die markierte Fläche trägt diese Oberflächenangabe.",
+        type:"single", options:[
+          {value:"yes",label:"Materialabtrag ist unzulässig; Rz darf höchstens 10 µm betragen."},
+          {value:"remove",label:"Materialabtrag ist erforderlich; Rz darf höchstens 10 µm betragen."},
+          {value:"ra",label:"Materialabtrag ist unzulässig; Ra darf höchstens 10 µm betragen."},
+          {value:"exact",label:"Materialabtrag ist unzulässig; Rz muss genau 10 µm betragen."},
+          {value:"optional",label:"Das Herstellverfahren ist frei wählbar; Rz darf höchstens 10 µm betragen."}
+        ],answer:"yes",solution:"Der Kreis verbietet Materialabtrag. Rz 10 gibt die Obergrenze für die gemittelte Rautiefe in µm an."
+      },
+      {
+        id:"c-measure", short:"Rz berechnen", topic:"Rauheitsmessung", kind:"sprint-measure", sheet:"Messprotokoll · fünf Messstrecken", caption:"Einzelrautiefen: 4 µm · 6 µm · 10 µm · 5 µm · 5 µm",
+        title:"Wie groß ist Rz?", copy:"Bestimme die gemittelte Rautiefe aus den fünf Messwerten.",
+        type:"single",options:[{value:"6",label:"6 µm"},{value:"10",label:"10 µm"},{value:"7.5",label:"7,5 µm"},{value:"5",label:"5 µm"},{value:"4",label:"4 µm"}],answer:"6",
+        solution:"Rz = (4 + 6 + 10 + 5 + 5) ÷ 5 = 6 µm. Der größte Einzelwert 10 µm ist hier Rmax."
+      },
+      {
+        id:"c-relief", short:"Freistich lesen", topic:"Genormte Formelemente", kind:"sprint-relief", sheet:"Wellenabsatz · Freistich", caption:"DIN 509 – E 2,5 × 0,4",
+        title:"Welche Maße sind angegeben?", copy:"Wähle die richtige Entschlüsselung.",
+        type:"single",options:[
+          {value:"yes",label:"Form E · Radius 2,5 mm · Einstichtiefe 0,4 mm"},
+          {value:"swap",label:"Form E · Radius 0,4 mm · Einstichtiefe 2,5 mm"},
+          {value:"diameter",label:"Form E · Durchmesser 2,5 mm · Einstichtiefe 0,4 mm"},
+          {value:"width",label:"Form E · Breite 2,5 mm · Radius 0,4 mm"},
+          {value:"form",label:"Form F · Radius 2,5 mm · Einstichtiefe 0,4 mm"}
+        ],answer:"yes",solution:"Bei dieser Freistichbezeichnung steht zuerst der Radius und dann die Einstichtiefe: r = 2,5 mm, t₁ = 0,4 mm; Form E."
+      },
+      {
+        id:"c-edge", short:"Werkstückkante", topic:"Werkstückkanten", kind:"edge", sheet:"Außenkante · Kantenzustand", caption:"Die Kantenangabe bezieht sich auf die theoretisch scharfe Außenkante.",
+        title:"Wie muss die Kante aussehen?", copy:"Was bedeutet die negative Kantenangabe −0,3 / −0,1?",
+        type:"single",options:[
+          {value:"remove",label:"An der Außenkante ist eine Abtragung von 0,1 bis 0,3 mm gefordert."},
+          {value:"burr",label:"An der Außenkante ist ein Materialüberschuss von 0,1 bis 0,3 mm zulässig."},
+          {value:"maximum",label:"Eine Abtragung bis 0,3 mm ist zulässig; eine Mindestabtragung ist nicht gefordert."},
+          {value:"chamfer",label:"Die Außenkante muss eine Fase von genau 0,3 mm bei 45° erhalten."},
+          {value:"radius",label:"Die Außenkante muss mit einem Radius zwischen 0,1 und 0,3 mm gerundet werden."}
+        ],answer:"remove",solution:"Das Minuszeichen steht an dieser Außenkante für Materialabtragung: mindestens 0,1 mm und höchstens 0,3 mm. Eine bestimmte Fasenform ist damit nicht festgelegt."
+      },
+      {
+        id:"c-hardness", short:"Härte & Härtetiefe", topic:"Weitere Zeichnungsangaben", kind:"hardness", sheet:"Lagerbolzen · Wärmebehandlung", caption:"Härtevorgabe und Einsatzhärtungstiefe für den gekennzeichneten Bereich.",
+        title:"Welche Bereiche sind zulässig?", copy:"Lies die Härte und die Einsatzhärtungstiefe aus der Angabe.",
+        type:"single",options:[
+          {value:"yes",label:"Härte 61–63 HRC · Einsatzhärtungstiefe 1,0–1,1 mm"},
+          {value:"symmetric",label:"Härte 59–63 HRC · Einsatzhärtungstiefe 0,9–1,1 mm"},
+          {value:"exact",label:"Härte genau 63 HRC · Einsatzhärtungstiefe genau 1,1 mm"},
+          {value:"depth",label:"Härte 61–63 HRC · Einsatzhärtungstiefe 0,9–1,1 mm"},
+          {value:"lower",label:"Härte 59–61 HRC · Einsatzhärtungstiefe 1,0–1,1 mm"}
+        ],answer:"yes",solution:"61 +2 HRC bedeutet 61 bis 63 HRC. Eht = 1,0 +0,1 mm bedeutet eine Einsatzhärtungstiefe von 1,0 bis 1,1 mm."
+      },
+      {
+        id:"c-center", short:"Zentrierbohrung", topic:"Genormte Formelemente", kind:"center-sprint", sheet:"Stirnseite · Zentrierbohrung", caption:"DIN 332 – B 6,3 · Alle Durchmesserangaben in mm.",
+        title:"Wie ist die Bohrung ausgeführt?", copy:"Welche Aussage passt zur angegebenen Zentrierbohrung?",
+        type:"single",options:[
+          {value:"yes",label:"Form B mit Schutzsenkung · Bohrungsdurchmesser d₁ = 6,3 mm"},
+          {value:"without",label:"Form B ohne Schutzsenkung · Bohrungsdurchmesser d₁ = 6,3 mm"},
+          {value:"outside",label:"Form B mit Schutzsenkung · äußerer Senkungsdurchmesser = 6,3 mm"},
+          {value:"radius",label:"Form B mit Schutzsenkung · Radius der Bohrung = 6,3 mm"},
+          {value:"depth",label:"Form B mit Schutzsenkung · Bohrungstiefe = 6,3 mm"}
+        ],answer:"yes",solution:"Form B hat eine Schutzsenkung. Die Zahl 6,3 bezeichnet den Bohrungsdurchmesser d₁ in mm, nicht den äußeren Senkungsdurchmesser oder die Tiefe."
+      },
+      {
+        id:"c-comparison", short:"Ra und Rz vergleichen", topic:"Rauheitskenngrößen", kind:"comparison", sheet:"Lagerbolzen · Messprotokoll", caption:"Zeichnung und Messprotokoll verwenden unterschiedliche Rauheitskenngrößen.",
+        title:"Reicht dieser Messwert aus?", copy:"Ist mit dem angegebenen Ra-Messwert nachgewiesen, dass die Rz-Vorgabe erfüllt ist?",
+        type:"single",options:[
+          {value:"no",label:"Nein. Ra und Rz sind verschiedene Kenngrößen; für den Nachweis wird der passende Rz-Wert benötigt."},
+          {value:"smaller",label:"Ja. 0,8 ist kleiner als 6,3; deshalb ist die Rz-Vorgabe erfüllt."},
+          {value:"same",label:"Ja. Ra und Rz beschreiben dieselbe Größe mit unterschiedlichen Bezeichnungen."},
+          {value:"factor",label:"Ja. Rz ist immer genau viermal so groß wie Ra."},
+          {value:"failed",label:"Nein. Ein Ra von 0,8 µm beweist bereits, dass Rz über 6,3 µm liegt."}
+        ],answer:"no",solution:"Ra und Rz lassen sich nicht mit einem allgemeingültigen festen Faktor ineinander umrechnen. Der Ra-Wert allein weist die Einhaltung von Rz ≤ 6,3 µm nicht nach."
+      },
+      {
+        id:"c-cutting", short:"Rauheit verringern", topic:"Fertigungsbedingungen", kind:"cutting", sheet:"Drehen · Prozessanpassung", caption:"Betrachte den geometrischen Einfluss. Alle anderen Fertigungsbedingungen bleiben gleich.",
+        title:"Welche Anpassung hilft?", copy:"Die gedrehte Oberfläche soll feiner werden. Welche Kombination wirkt mit beiden Änderungen in Richtung einer geringeren geometrisch bedingten Rauheit?",
+        type:"single",options:[
+          {value:"yes",label:"Vorschub verringern · Schneidenradius vergrößern"},
+          {value:"both-up",label:"Vorschub erhöhen · Schneidenradius vergrößern"},
+          {value:"both-down",label:"Vorschub verringern · Schneidenradius verkleinern"},
+          {value:"rough",label:"Vorschub erhöhen · Schneidenradius verkleinern"},
+          {value:"same",label:"Vorschub unverändert lassen · Schneidenradius verkleinern"}
+        ],answer:"yes",solution:"Ein kleinerer Vorschub und ein größerer Schneidenradius vermindern gemeinsam die geometrisch bedingte Rauheit. Bei den anderen Kombinationen wirkt mindestens eine Änderung in die entgegengesetzte Richtung."
+      },
+      {
+        id:"c-tolerance", short:"Toleranz benennen", topic:"Form- und Lagetoleranzen", kind:"tolerance-sprint", sheet:"Platte · geometrische Toleranz", caption:"Toleranzwert in mm · Bezug A ist an der Unterseite festgelegt.",
+        title:"Was bedeutet dieser Rahmen?", copy:"Benenne die Toleranz und ordne sie als Form- oder Lagetoleranz ein.",
+        type:"fields",fields:[
+          {key:"name",label:"Toleranzname",accepted:["Rechtwinkligkeit","Rechtwinkligkeitstoleranz","Rechtwinkeligkeit","Rechtwinkeligkeitstoleranz","Senkrechtheit","Senkrechtigkeit"]},
+          {key:"type",label:"Toleranzart",accepted:["Lagetoleranz","Lage","Richtungstoleranz","Orientierungstoleranz"]}
+        ],solution:"Das Zeichen steht für Rechtwinkligkeit. Gefordert ist eine Rechtwinkligkeitstoleranz von 0,03 mm zum Bezug A. Im Unterricht zählt sie zu den Lagetoleranzen; genauer ist sie eine Richtungstoleranz."
+      },
+      {
+        id:"c-inspection", short:"Fertigungsfehler finden", topic:"Zeichnung prüfen", kind:"inspection", sheet:"Lagerbolzen · Endkontrolle", caption:"Die Obergrenzen stehen oben am Bauteil. Die tatsächlich gemessenen Ra-Werte stehen unten bei A, B und C.",
+        title:"Welche Fläche fällt durch?", copy:"Vergleiche jeden Messwert mit der zugehörigen Ra-Obergrenze.",
+        type:"single",options:[{value:"A",label:"Nur Fläche A erfüllt ihre Vorgabe nicht."},{value:"B",label:"Nur Fläche B erfüllt ihre Vorgabe nicht."},{value:"C",label:"Nur Fläche C erfüllt ihre Vorgabe nicht."},{value:"AB",label:"Die Flächen A und B erfüllen ihre Vorgaben nicht."},{value:"none",label:"Alle drei Flächen erfüllen ihre Vorgabe."}],answer:"B",
+        solution:"Fläche B erfüllt die Vorgabe nicht: Ra 1,2 µm ist größer als die zulässigen 0,8 µm. A (1,6 ≤ 3,2) und C (0,9 ≤ 1,6) sind zulässig."
+      }
+    ];
+
+    const CHALLENGE_SECONDS = 240;
+    const CHALLENGE_MAX = challenges.length * 100;
+    const STORAGE_KEY = "zeichnungscheck-v2";
+    const BEST_KEY = "zeichnungscheck-best-v2";
+    function shuffle(items) {
+      const result = items.slice();
+      for (let i=result.length-1; i>0; i--) {
+        const j = Math.floor(Math.random() * (i+1));
+        [result[i],result[j]] = [result[j],result[i]];
+      }
+      if (result.length > 1 && result.every((item,i) => item === items[i])) {
+        [result[0],result[1]] = [result[1],result[0]];
+      }
+      return result;
+    }
+    function createOrders(questions) {
+      const orders = {};
+      let positions = [];
+      questions.forEach(q => {
+        if (q.type === "fields") {
+          q.fields.filter(f => f.options).forEach(f => {
+            orders[q.id + "." + f.key] = shuffle(f.options.map((_,i) => i));
+          });
+          return;
+        }
+        let indices = q.options.map((_,i) => i);
+        if (q.type === "single") {
+          if (!positions.length) positions = shuffle([0,1,2,3,4]);
+          const correct = q.options.findIndex(o => o.value === q.answer);
+          indices = shuffle(indices.filter(i => i !== correct));
+          indices.splice(positions.shift() % q.options.length,0,correct);
+        } else {
+          indices = shuffle(indices);
+          if (indices.slice(0,q.answer.length).every(i => q.answer.includes(q.options[i].value))) {
+            const wrong = indices.findIndex(i => !q.answer.includes(q.options[i].value));
+            [indices[1],indices[wrong]] = [indices[wrong],indices[1]];
+          }
+        }
+        orders[q.id] = indices;
+      });
+      return orders;
+    }
+    function orderedOptions(q, field, options) {
+      const orders = q.id.startsWith("c-") ? state.orders.challenge : state.orders.practice;
+      const order = orders && orders[q.id + (field ? "." + field : "")];
+      return order ? order.map(i => options[i]) : options;
+    }
+    const emptyPractice = () => ({value:{}, attempts:0, hint:false, done:false, points:0, feedback:""});
+    const freshState = () => ({version:2,screen:"practice",index:0,practice:practices.map(emptyPractice),practiceStarted:Date.now(),practiceFinished:null,challenge:null,orders:{practice:createOrders(practices),challenge:null}});
+    let state = freshState(), best = null, timer = null, validation = "";
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (saved && saved.version === 2 && saved.orders && saved.orders.practice && ["practice","bridge","challenge","results"].includes(saved.screen) && saved.practice && saved.practice.length === practices.length && Number.isInteger(saved.index) && saved.index >= 0 && saved.index < practices.length) {
+        const validPractice = saved.practice.every(r => r && typeof r.value === "object" && r.value !== null && Number.isInteger(r.attempts) && r.attempts >= 0 && r.attempts <= 2 && typeof r.done === "boolean");
+        const validChallenge = !saved.challenge || (Number.isFinite(saved.challenge.started) && Array.isArray(saved.challenge.answers) && saved.challenge.answers.length <= challenges.length && saved.orders.challenge);
+        if (validPractice && validChallenge && (!(saved.screen === "challenge" || saved.screen === "results") || saved.challenge)) state = saved;
+      }
+      const storedBest = JSON.parse(localStorage.getItem(BEST_KEY));
+      if (storedBest && Number.isFinite(storedBest.score) && Number.isFinite(storedBest.seconds)) best = storedBest;
+    } catch (_) { /* Storage is optional, including when opening a local file. */ }
+    const persist = () => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} };
+    const practicePoints = () => state.practice.reduce((sum,r) => sum + r.points,0);
+    const completed = () => state.practice.filter(r => r.done).length;
+    const timeText = seconds => Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2,"0");
+    const optionObject = item => typeof item === "string" ? {value:item,label:item} : item;
+    const normalizeAnswer = text => String(text).trim().toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[^a-z0-9]/g,"");
+    function checkAnswer(q, value) {
+      if (q.type === "multi") {
+        const selected = Array.isArray(value.selected) ? value.selected : [];
+        return selected.length === q.answer.length && q.answer.every(v => selected.includes(v));
+      }
+      if (q.type === "single") return value.selected === q.answer;
+      return q.fields.every(f => {
+        if (f.accepted) return f.accepted.some(answer => normalizeAnswer(value[f.key]) === normalizeAnswer(answer));
+        if (f.unit) {
+          const raw = String(value[f.key] || "").trim().replace(",",".");
+          if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw)) return false;
+          return Math.abs(Number(raw) - f.answer) < .00001;
+        }
+        return value[f.key] === f.answer;
+      });
+    }
+    function hasAnswer(q, value) {
+      if (q.type === "multi") return Array.isArray(value.selected) && value.selected.length > 0;
+      if (q.type === "single") return typeof value.selected === "string" && value.selected !== "";
+      return q.fields.every(f => String(value[f.key] || "").trim() !== "");
+    }
+    function answerSummary(q, value) {
+      if (!value || !hasAnswer(q,value)) return "Nicht beantwortet";
+      if (q.type === "fields") return q.fields.map(f => {
+        const v = f.options ? (f.options.map(optionObject).find(o => o.value === value[f.key]) || {}).label : value[f.key];
+        return (f.strong || f.label) + ": " + (v || "–") + (f.unit ? " " + f.unit : "");
+      }).join(" · ");
+      const values = q.type === "multi" ? value.selected : [value.selected];
+      return values.map(v => (q.options.find(o => o.value === v) || {}).label || "–").join(" / ");
+    }
+    function renderSidebar() {
+      const inChallenge = state.screen === "challenge";
+      const competitive = inChallenge || state.screen === "results";
+      const practiceTab = document.getElementById("practice-tab");
+      practiceTab.innerHTML = icon("book") + "Übungsrunde";
+      practiceTab.classList.toggle("active", !competitive);
+      practiceTab.disabled = inChallenge;
+      practiceTab.setAttribute("aria-current", !competitive ? "step" : "false");
+      const challengeTab = document.getElementById("challenge-tab");
+      challengeTab.innerHTML = icon("trophy") + "Meistercheck";
+      challengeTab.classList.toggle("active", competitive);
+      challengeTab.disabled = completed() < practices.length || inChallenge;
+      challengeTab.setAttribute("aria-current", competitive ? "step" : "false");
+      const list = competitive ? challenges : practices;
+      document.getElementById("step-heading").textContent = competitive ? challenges.length + " Wettbewerbsfragen" : practices.length + " Übungsaufgaben";
+      document.getElementById("steps").innerHTML = list.map((q,i) => {
+        const done = competitive ? !!state.challenge.answers[i] : state.practice[i].done;
+        const current = competitive ? inChallenge && i === state.challenge.answers.length : state.screen === "practice" && i === state.index;
+        const firstOpen = state.practice.findIndex(r => !r.done);
+        const available = !competitive && (state.practice[i].done || i === firstOpen);
+        return '<button class="step' + (done ? " done" : "") + (current ? " active" : "") + '" data-step="' + i + '" ' + (!available ? "disabled " : "") + (current ? 'aria-current="step"' : "") + '><span class="step-number">' + (done ? icon("check") : String(i+1).padStart(2,"0")) + '</span><span>' + escapeHTML(q.short) + '</span></button>';
+      }).join("");
+      const doneCount = competitive ? state.challenge.answers.length : completed();
+      const total = competitive ? challenges.length : practices.length;
+      document.getElementById("progress-label").textContent = doneCount + " von " + total + " erledigt";
+      document.getElementById("progress-fill").style.width = doneCount / total * 100 + "%";
+      const progress = document.querySelector(".mini-progress");
+      progress.setAttribute("aria-valuemax", total);
+      progress.setAttribute("aria-valuenow",doneCount);
+    }
+    function answerFields(q, value, disabled) {
+      const disabledAttr = disabled ? " disabled" : "";
+      if (q.type === "fields") return '<div class="fields">' + q.fields.map(f => {
+        const label = '<label for="field-' + f.key + '">' + (f.strong ? '<strong>' + escapeHTML(f.strong) + '</strong>' : "") + escapeHTML(f.label) + '</label>';
+        let input = "";
+        if (f.options) input = '<select id="field-' + f.key + '" data-field="' + f.key + '"' + disabledAttr + '><option value="">Auswählen …</option>' + orderedOptions(q,f.key,f.options).map(optionObject).map(o => '<option value="' + escapeHTML(o.value) + '"' + (value[f.key] === o.value ? " selected" : "") + '>' + escapeHTML(o.label) + '</option>').join("") + '</select>';
+        else if (f.accepted) input = '<input class="text-input" id="field-' + f.key + '" data-field="' + f.key + '" type="text" autocomplete="off" spellcheck="false" maxlength="64" value="' + escapeHTML(value[f.key] || "") + '"' + disabledAttr + '>';
+        else input = '<input class="number-input" id="field-' + f.key + '" data-field="' + f.key + '" type="text" inputmode="decimal" autocomplete="off" maxlength="12" value="' + escapeHTML(value[f.key] || "") + '" aria-label="' + escapeHTML((f.strong || f.label) + " in " + f.unit) + '"' + disabledAttr + '><span class="unit">' + f.unit + '</span>';
+        return '<div class="field-row">' + label + '<div class="field-control">' + input + '</div></div>';
+      }).join("") + '</div>';
+      return '<fieldset class="answers"><legend>' + escapeHTML(q.title) + '</legend>' + orderedOptions(q,"",q.options).map(o => {
+        const selected = q.type === "multi" ? (value.selected || []).includes(o.value) : value.selected === o.value;
+        return '<label class="choice"><input type="' + (q.type === "multi" ? "checkbox" : "radio") + '" name="answer" value="' + o.value + '" ' + (selected ? "checked " : "") + disabledAttr + '><span>' + escapeHTML(o.label) + '</span></label>';
+      }).join("") + '</fieldset>';
+    }
+    function questionHTML(q, isChallenge) {
+      const idx = isChallenge ? state.challenge.answers.length : state.index;
+      const record = isChallenge ? {value:state.challenge.draft || {},done:false} : state.practice[idx];
+      const feedback = record.feedback;
+      let notice = "";
+      if (feedback) {
+        const correct = feedback === "correct";
+        const done = record.done;
+        const title = correct ? "Richtig gelesen." : done ? "Hier ist die Auflösung." : "Noch nicht ganz.";
+        const detail = correct || done ? q.solution : "Prüfe deine Antworten noch einmal. Du hast einen zweiten Versuch.";
+        notice = '<div class="feedback' + (!correct ? " wrong" : "") + '" role="status"><strong>' + title + '</strong>' + escapeHTML(detail) + '</div>';
+      }
+      let action = "";
+      if (record.done) action = '<button type="button" class="button" id="next">' + (idx === practices.length - 1 ? "Zum Meistercheck" : "Weiter") + icon("arrow") + '</button>';
+      else action = '<button type="submit" class="button' + (isChallenge ? " yellow" : "") + '">' + (isChallenge ? (idx === challenges.length - 1 ? "Meistercheck abschließen" : "Antwort abgeben") : "Antwort prüfen") + icon("check") + '</button>';
+      if (!isChallenge && !record.done) action += '<button type="button" class="text-button" id="hint"' + (record.hint ? " disabled" : "") + '>' + icon("bulb") + 'Hinweis' + (!record.hint ? " (max. 1 Punkt)" : "") + '</button>';
+      return '<div class="work-top"><div><div class="eyebrow">' + (isChallenge ? "Meistercheck" : "Zeichnungsdetektiv") + ' · Aufgabe ' + (idx + 1) + ' / ' + (isChallenge ? challenges.length : practices.length) + '</div><h2>' + escapeHTML(q.topic) + '</h2></div>' + (isChallenge ? '<div class="time-badge live" id="clock" role="timer" aria-label="Verbleibende Zeit">' + icon("timer") + '<span></span></div>' : '<div class="time-badge">' + icon("timer") + 'ca. 8–10 Min.</div>') + '</div>' +
+        '<div class="work-grid"><figure class="drawing"><div class="drawing-toolbar"><span>ZEICHNUNGSAUSSCHNITT</span><button id="zoom" class="icon-button" aria-label="Zeichnung vergrößern" data-tip="Vergrößern">' + icon("expand") + '</button></div><div class="sheet">' + drawing(q.kind) + '<div class="title-block"><div><strong>' + escapeHTML(q.sheet) + '</strong>Industriemechanik · Klasse 11</div><div><strong>ZC-' + String(idx+1).padStart(2,"0") + '</strong>Schema · ohne Maßstab</div></div></div><figcaption>' + escapeHTML(q.caption) + '</figcaption></figure>' +
+        '<section class="question" aria-labelledby="question-title"><span class="tag' + (isChallenge ? " competition-tag" : "") + '">' + (isChallenge ? "100 Punkte pro gelöster Aufgabe" : "ÜBEN & ANWENDEN") + '</span><h3 id="question-title">' + escapeHTML(q.title) + '</h3><p class="question-copy">' + escapeHTML(q.copy) + '</p><form id="answer-form">' + answerFields(q,record.value,record.done) + (validation ? '<p class="validation" role="alert">' + escapeHTML(validation) + '</p>' : "") + (!isChallenge && record.hint ? '<div class="hint-box">' + escapeHTML(q.hint) + '</div>' : "") + notice + '<div class="actions">' + action + '</div></form>' + (!isChallenge ? '<p class="points-note">' + (record.done ? 'Erreicht: ' + record.points + ' / 2 Punkte' : '1. Versuch: 2 Punkte · 2. Versuch oder Hinweis: 1 Punkt') + '</p>' : "") + '</section></div><div class="bottom-line"><span>Oberflächenangaben · Zeichnungen lesen · Fertigung beurteilen</span><span>' + (isChallenge ? "Auswertung nach der letzten Frage" : "Übungspunkte: " + practicePoints() + " / 18") + '</span></div>';
+    }
+    function renderBridge() {
+      const firstTry = state.practice.filter(r => r.points === 2).length;
+      return '<section class="transition"><div class="seal">' + icon("check") + '</div><div class="eyebrow" style="margin-top:20px">Übungsrunde abgeschlossen</div><h2>Bereit für den Meistercheck.</h2><p>Die Zeichnungen sind gelesen. Jetzt kannst du dein Wissen in einer kurzen Wettbewerbsrunde anwenden.</p>' +
+        '<div class="stats"><div class="stat"><strong>' + practicePoints() + ' / 18</strong><span>Übungspunkte</span></div><div class="stat"><strong>' + firstTry + ' / 9</strong><span>Direkt ohne Hinweis gelöst</span></div><div class="stat"><strong>' + timeText(CHALLENGE_SECONDS) + '</strong><span>Minuten im Meistercheck</span></div></div><h3>Dein nächster Auftrag</h3>' +
+        '<div class="competition-rules"><div class="rule">' + icon("target") + '<span>' + challenges.length + ' Fragen · je 100 Punkte pro richtig gelöster Aufgabe</span></div><div class="rule">' + icon("timer") + '<span>Bei gleicher Punktzahl entscheidet die kürzere Zeit.</span></div><div class="rule">' + icon("trophy") + '<span>Am Ende erhältst du deine Punktzahl und alle Lösungen.</span></div></div>' +
+        '<div class="actions"><button id="start-challenge" class="button yellow">' + icon("trophy") + 'Meistercheck starten</button><button id="review-practice" class="button secondary">Übungsantworten ansehen</button></div><div class="best">' + (best ? "Dein Rekord: " + best.score + " / " + CHALLENGE_MAX + " Punkte · " + timeText(best.seconds) : "") + '</div></section>';
+    }
+    function reviews(questions, records, challenge) {
+      return questions.map((q,i) => {
+        const r = records[i];
+        const correct = challenge ? !!r && r.correct : r.points > 0;
+        const label = !r ? "Nicht beantwortet" : challenge ? (correct ? "Richtig" : "Falsch") : r.points + " / 2 Punkte";
+        return '<details class="review-item"><summary><span class="status-dot' + (!correct ? " wrong" : "") + '">' + icon(correct ? "check" : "x") + '</span><strong>' + (i+1) + '. ' + escapeHTML(q.short) + '</strong><span style="margin-left:auto;white-space:nowrap;font-size:11px">' + label + '</span></summary><div class="review-body"><p><strong>Deine Antwort:</strong> ' + escapeHTML(answerSummary(q,r && r.value)) + '</p><div class="review-drawing">' + drawing(q.kind) + '</div><p><strong>Lösung:</strong> ' + escapeHTML(q.solution) + '</p></div></details>';
+      }).join("");
+    }
+    function renderResults() {
+      const c = state.challenge;
+      const correct = c.answers.filter(a => a.correct).length;
+      const score = correct * 100;
+      const weak = practices.filter((q,i) => state.practice[i].points < 2).map(q => q.short);
+      const headline = score === CHALLENGE_MAX ? "Zeichnungen? Hast du im Griff." : score >= CHALLENGE_MAX * 2 / 3 ? "Ein guter Werkstatt-Check." : "Die nächste Runde wird besser.";
+      return '<section class="transition"><div class="seal yellow">' + icon("trophy") + '</div><div class="eyebrow" style="margin-top:20px">Meistercheck abgeschlossen' + (c.timedOut ? " · Zeit abgelaufen" : "") + '</div><h2>' + headline + '</h2><p>' + (c.timedOut ? "Die vier Minuten sind um. Alle abgegebenen Antworten sind gewertet; offene Fragen erhalten keine Punkte." : "Deine Antworten sind ausgewertet. Hier findest du dein Ergebnis und die Auflösungen.") + '</p>' +
+        '<div class="stats"><div class="stat"><strong>' + score + ' <span class="score-total">/ ' + CHALLENGE_MAX + '</span></strong><span>Wettbewerbspunkte</span></div><div class="stat"><strong>' + correct + ' / ' + challenges.length + '</strong><span>Richtig gelöste Aufgaben</span></div><div class="stat"><strong>' + timeText(c.seconds) + '</strong><span>Benötigte Zeit</span></div></div>' +
+        '<div class="result-summary"><h3>Deine Übungsrunde: ' + practicePoints() + ' / 18 Punkte</h3><p>' + (weak.length ? "Noch einmal anschauen: " + weak.join(" · ") : "Alle neun Aufgaben im ersten Versuch ohne Hinweis gelöst.") + '</p></div><div class="actions"><button id="again" class="button yellow">' + icon("reset") + 'Meistercheck wiederholen</button><button id="print" class="icon-button" aria-label="Ergebnis drucken" data-tip="Ergebnis drucken">' + icon("print") + '</button></div>' +
+        '<p class="best">Dein Rekord auf diesem Gerät: ' + best.score + ' / ' + CHALLENGE_MAX + ' Punkte · ' + timeText(best.seconds) + '</p><h3 class="review-heading">Deine Wettbewerbsantworten</h3><div class="review-list">' + reviews(challenges,c.answers,true) + '</div><h3 class="review-heading">Deine Übungsantworten</h3><div class="review-list">' + reviews(practices,state.practice,false) + '</div></section>';
+    }
+    function render(moveFocus) {
+      clearInterval(timer);
+      renderSidebar();
+      const main = document.getElementById("main");
+      if (state.screen === "practice") main.innerHTML = questionHTML(practices[state.index], false);
+      if (state.screen === "bridge") main.innerHTML = renderBridge();
+      if (state.screen === "challenge") {
+        main.innerHTML = questionHTML(challenges[state.challenge.answers.length], true);
+        updateClock();
+        if (state.screen === "challenge") timer = setInterval(updateClock,250);
+      }
+      if (state.screen === "results") main.innerHTML = renderResults();
+      bindMain();
+      persist();
+      if (moveFocus) {
+        const heading = main.querySelector("h3#question-title, .transition h2");
+        if (heading) { heading.setAttribute("tabindex","-1"); heading.focus({preventScroll:true}); }
+        window.scrollTo({top:0,behavior:"instant"});
+      }
+    }
+    function readValue(q, form) {
+      if (q.type === "fields") {
+        const value = {};
+        q.fields.forEach(f => { value[f.key] = form.querySelector('[data-field="' + f.key + '"]').value; });
+        return value;
+      }
+      const selected = Array.from(form.querySelectorAll('input[name="answer"]:checked')).map(input => input.value);
+      return {selected:q.type === "multi" ? selected : selected[0] || ""};
+    }
+    function bindMain() {
+      const form = document.getElementById("answer-form");
+      if (form) {
+        const q = state.screen === "challenge" ? challenges[state.challenge.answers.length] : practices[state.index];
+        form.addEventListener("input", () => {
+          const value = readValue(q,form);
+          if (state.screen === "challenge") state.challenge.draft = value;
+          else {
+            const r = state.practice[state.index];
+            if (!r.done) r.value = value;
+          }
+          const error = form.querySelector(".validation");
+          if (error) error.remove();
+          validation = "";
+          persist();
+        });
+        form.addEventListener("submit", event => { event.preventDefault(); submitAnswer(q,form); });
+      }
+      const on = (id, callback) => { const el = document.getElementById(id); if(el) el.addEventListener("click",callback); };
+      on("hint", () => { state.practice[state.index].hint = true; render(); document.getElementById("announcer").textContent = practices[state.index].hint; });
+      on("next", () => {
+        validation = "";
+        if (state.index === practices.length - 1) {
+          if (!state.practiceFinished) state.practiceFinished = Date.now();
+          state.screen = "bridge";
+        } else state.index++;
+        render(true);
+      });
+      on("start-challenge",startChallenge);
+      on("again",startChallenge);
+      on("review-practice", () => { state.screen = "practice"; state.index = 0; render(true); });
+      on("zoom", () => {
+        const q = state.screen === "challenge" ? challenges[state.challenge.answers.length] : practices[state.index];
+        document.getElementById("zoom-content").innerHTML = drawing(q.kind);
+        document.getElementById("zoom-title").textContent = q.sheet;
+        document.getElementById("zoom-dialog").showModal();
+      });
+      on("print", () => {
+        const details = Array.from(document.querySelectorAll(".review-item"));
+        const before = details.map(el => el.open);
+        details.forEach(el => { el.open = true; });
+        const restore = () => { details.forEach((el,i) => { el.open = before[i]; }); };
+        window.addEventListener("afterprint",restore,{once:true});
+        window.print();
+      });
+    }
+    function submitAnswer(q,form) {
+      if (state.screen === "challenge" && Date.now() - state.challenge.started >= CHALLENGE_SECONDS * 1000) { finishChallenge(true); return; }
+      if (state.screen === "practice" && state.practice[state.index].done) return;
+      const value = readValue(q,form);
+      if (!hasAnswer(q,value)) {
+        validation = q.type === "fields" ? "Bitte fülle alle Antwortfelder aus." : "Bitte wähle eine Antwort aus.";
+        render();
+        const first = document.querySelector("#answer-form input, #answer-form select");
+        if (first) first.focus();
+        return;
+      }
+      validation = "";
+      const correct = checkAnswer(q,value);
+      if (state.screen === "challenge") {
+        state.challenge.answers.push({value,correct});
+        state.challenge.draft = {};
+        if (state.challenge.answers.length === challenges.length) finishChallenge(false);
+        else render(true);
+        return;
+      }
+      const r = state.practice[state.index];
+      r.value = value;
+      r.attempts++;
+      r.feedback = correct ? "correct" : "wrong";
+      if (correct || r.attempts >= 2) {
+        r.done = true;
+        r.points = correct ? ((r.attempts === 1 && !r.hint) ? 2 : 1) : 0;
+      }
+      render();
+      const status = document.querySelector(".feedback");
+      if (status) { status.setAttribute("tabindex","-1"); status.focus({preventScroll:true}); }
+    }
+    function startChallenge() {
+      validation = "";
+      state.challenge = {started:Date.now(),answers:[],draft:{},seconds:0,timedOut:false};
+      state.orders.challenge = createOrders(challenges);
+      state.screen = "challenge";
+      render(true);
+    }
+    function updateClock() {
+      if (state.screen !== "challenge") return;
+      const remaining = Math.max(0, Math.ceil((state.challenge.started + CHALLENGE_SECONDS * 1000 - Date.now()) / 1000));
+      if (remaining === 0) { finishChallenge(true); return; }
+      const clock = document.getElementById("clock");
+      if (clock) {
+        clock.querySelector("span").textContent = timeText(remaining);
+        clock.classList.toggle("urgent",remaining <= 30);
+      }
+    }
+    function finishChallenge(timedOut) {
+      clearInterval(timer);
+      state.challenge.seconds = Math.min(CHALLENGE_SECONDS, Math.max(1,Math.ceil((Date.now() - state.challenge.started) / 1000)));
+      state.challenge.timedOut = timedOut;
+      const score = state.challenge.answers.filter(a => a.correct).length * 100;
+      const seconds = state.challenge.seconds;
+      if (!best || score > best.score || (score === best.score && seconds < best.seconds)) {
+        best = {score,seconds};
+        try { localStorage.setItem(BEST_KEY,JSON.stringify(best)); } catch (_) {}
+      }
+      state.screen = "results";
+      document.getElementById("zoom-dialog").close();
+      document.getElementById("reset-dialog").close();
+      render(true);
+    }
+    document.getElementById("reset").innerHTML = icon("reset");
+    document.getElementById("close-zoom").innerHTML = icon("x");
+    document.getElementById("reset").addEventListener("click",() => document.getElementById("reset-dialog").showModal());
+    document.getElementById("cancel-reset").addEventListener("click",() => document.getElementById("reset-dialog").close());
+    document.getElementById("confirm-reset").addEventListener("click",() => {
+      document.getElementById("reset-dialog").close();
+      state = freshState(); validation = ""; render(true);
+    });
+    document.getElementById("close-zoom").addEventListener("click",() => document.getElementById("zoom-dialog").close());
+    document.getElementById("practice-tab").addEventListener("click",() => { state.screen = "practice"; validation = ""; render(true); });
+    document.getElementById("challenge-tab").addEventListener("click",() => { state.screen = state.challenge && state.challenge.answers.length ? "results" : "bridge"; validation = ""; render(true); });
+    document.getElementById("steps").addEventListener("click",event => {
+      const button = event.target.closest("[data-step]");
+      if (!button || button.disabled || state.screen === "challenge" || state.screen === "results") return;
+      state.index = Number(button.dataset.step); state.screen = "practice"; validation = ""; render(true);
+    });
+    document.addEventListener("visibilitychange",() => { if(!document.hidden) updateClock(); });
+    window.addEventListener("pageshow",updateClock);
+    if (state.screen === "results" && !best) {
+      best = {score:state.challenge.answers.filter(a => a.correct).length * 100,seconds:state.challenge.seconds || CHALLENGE_SECONDS};
+    }
+    render();
+  </script>
+  <!-- Lucide icons license:
+  ISC License
+  Copyright (c) Lucide Contributors.
+  Permission to use, copy, modify, and/or distribute this software for any purpose
+  with or without fee is hereby granted, provided that the above copyright notice
+  and this permission notice appear in all copies.
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+  REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+  AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+  INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+  LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+  OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+  PERFORMANCE OF THIS SOFTWARE.
+  -->
+</body>
+</html>
